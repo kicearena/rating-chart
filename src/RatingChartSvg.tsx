@@ -3,6 +3,7 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type FocusEvent as ReactFocusEvent,
   type ReactNode,
   type SVGProps,
   type Ref,
@@ -76,6 +77,7 @@ export function RatingChartSvg({
     : inputChart;
   const [activePoint, setActivePoint] = useState<number | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipRef = useRef<SVGGElement>(null);
   useEffect(
     () => () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -89,7 +91,11 @@ export function RatingChartSvg({
   };
   const scheduleClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setActivePoint(null), 240);
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      if (tooltipRef.current?.contains(document.activeElement)) return;
+      setActivePoint(null);
+    }, 240);
   };
   const pointerX = (event: ReactPointerEvent<SVGGraphicsElement>) => {
     const svg = event.currentTarget.ownerSVGElement;
@@ -365,9 +371,20 @@ export function RatingChartSvg({
       )}
       {active && (
         <g
+          ref={tooltipRef}
           className="rating-chart-tooltip"
           onPointerEnter={() => openPoint(active.recordIndex)}
           onPointerLeave={scheduleClose}
+          onFocus={() => openPoint(active.recordIndex)}
+          onBlur={(event: ReactFocusEvent<SVGGElement>) => {
+            if (
+              event.relatedTarget instanceof Node &&
+              event.currentTarget.contains(event.relatedTarget)
+            ) {
+              return;
+            }
+            scheduleClose();
+          }}
         >
           <line
             x1={active.x}

@@ -11,9 +11,9 @@ Calendar-spaced line chart geometry and an accessible React SVG renderer for **a
 Install directly from the public npm registry:
 
 ```sh
-npm install --save-exact @kicearena/rating-chart@0.1.2
+npm install --save-exact @kicearena/rating-chart@0.1.3
 # or
-bun add --exact @kicearena/rating-chart@0.1.2
+bun add --exact @kicearena/rating-chart@0.1.3
 ```
 
 ```tsx
@@ -33,7 +33,7 @@ const chart = ratingHistoryChart(history, {
 />;
 ```
 
-`@kicearena/rating-chart/geometry` has no React runtime import. Input records are chronological `{startedAt, rating}` values. `joinedAt` anchors the chart's first date and zero-rating baseline; straight line segments connect the starting point and each contest record, then carry the final rating to the selected range's right edge. `recordIndex` maps visible points back to the original records. A selected start date carries the preceding rating into the trace; `endAt` can cap the range. An empty history returns null. Coordinates follow elapsed time rather than array indices. Calendar ticks use KST month boundaries; crowded date labels are omitted to prevent collisions while preserving the selected period's first and last labels. Drag across the plot to select a time range, then use horizontal scroll or Shift+scroll to pan through that range; double-click or use the reset control to return to the full range. Hover or keyboard focus on a point shows its event title, rating, change from the preceding record, and formatted date with a vertical guide; points retain native SVG titles as well. `renderTooltip` can replace the default contents with host-provided React content such as contest rank or links. The tooltip stays open while the pointer moves into it and closes after a short exit delay.
+`@kicearena/rating-chart/geometry` has no React runtime import. Input records are chronological `{startedAt, rating}` values. `joinedAt` anchors the chart's first date and zero-rating baseline; straight line segments connect the starting point and each contest record, then carry the final rating to the selected range's right edge. `recordIndex` maps visible points back to the original records. A selected start date carries the preceding rating into the trace; `endAt` can cap the range. An empty history returns null. Coordinates follow elapsed time rather than array indices. Calendar ticks use KST month boundaries; crowded date labels are omitted to prevent collisions while preserving the selected period's first and last labels. Drag across the plot to select a time range, then use horizontal scroll or Shift+scroll to pan through that range; double-click or use the reset control to return to the full range. Hover or keyboard focus on a point shows its event title, rating, change from the preceding record, and formatted date with a vertical guide; points retain native SVG titles as well. `renderTooltip` can replace the default contents with host-provided React content such as contest rank or links. The tooltip stays open while the pointer moves into it, and stays open while keyboard focus is inside it, so its links can be reached and activated with Tab and Enter. It closes after the pointer and focus leave.
 
 Options: `width`, `height`, `joinedAt`, `startAt`, `endAt`, `highestRankBoundary`. The package contains no fixed signup date, rating formula, rank thresholds, account/API access or fetch. `RatingChartSvg` receives prepared `{key,minimum,maximum,color}` bands and label functions; resize observation and explicit date inputs stay in the host.
 
