@@ -16,10 +16,10 @@ const legacyChart = (
     height,
     highestRankBoundary,
     startAt,
-    minimumStart: "2026-01-01T00:00:00+09:00",
+    joinedAt: "2026-01-01T00:00:00+09:00",
   });
 describe("rating chart geometry", () => {
-  it("starts at the 2026 launch and stays at zero until the first contest", () => {
+  it("starts at signup and connects the initial zero rating to the first contest", () => {
     const chart = legacyChart([record(1_500)], 100, 100)!;
 
     expect(chart.firstDate).toBe("2025-12-31T15:00:00.000Z");
@@ -27,9 +27,9 @@ describe("rating chart geometry", () => {
       x: 16,
       y: chart.ticks.at(-1)?.y,
     });
-    expect(chart.tracePoints[1].y).toBe(chart.tracePoints[0].y);
     expect(chart.tracePoints[1].x).toBe(chart.points[0].x);
-    expect(chart.tracePoints[2].y).toBe(chart.points[0].y);
+    expect(chart.tracePoints[1].y).toBe(chart.points[0].y);
+    expect(chart.tracePoints).toHaveLength(2);
     expect(chart.timeTicks).toHaveLength(2);
     expect(chart.ticks.at(-1)?.value).toBe(0);
     expect(chart.minimum).toBe(0);
@@ -51,9 +51,9 @@ describe("rating chart geometry", () => {
     expect(chart?.points[1]?.x).toBeCloseTo(72.8);
     expect(chart?.points[2]?.x).toBe(584);
     expect(chart?.timeTicks.map((tick) => tick.x)).toEqual([16, 584]);
-    expect(chart?.tracePoints[3]).toMatchObject({
+    expect(chart?.tracePoints[2]).toMatchObject({
       x: chart?.points[1]?.x,
-      y: chart?.points[0]?.y,
+      y: chart?.points[1]?.y,
     });
     expect(chart?.ticks.at(-1)).toMatchObject({ value: 0 });
   });
@@ -78,8 +78,7 @@ describe("rating chart geometry", () => {
 
     expect(chart.firstDate).toBe("2026-07-31T15:00:00.000Z");
     expect(chart.points.map((point) => point.recordIndex)).toEqual([1]);
-    expect(chart.tracePoints).toHaveLength(3);
-    expect(chart.tracePoints[0].y).toBe(chart.tracePoints[1].y);
+    expect(chart.tracePoints).toHaveLength(2);
     expect(chart.tracePoints[0].y).toBeLessThan(chart.ticks.at(-1)!.y);
     expect(chart.tracePoints[0].y).toBeGreaterThan(chart.points[0].y);
   });

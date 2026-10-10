@@ -1,7 +1,10 @@
 export type RatingChartPoint = {
   x: number;
   y: number;
+  at: number;
   rating: number;
+  previousRating: number;
+  delta: number;
   recordIndex: number;
 };
 
@@ -26,6 +29,9 @@ export type RatingChart = {
   maximum: number;
   firstDate: string;
   lastDate: string;
+  sourceHistory: readonly RatingRecord[];
+  joinedAt: string;
+  highestRankBoundary: number;
 };
 
 const chartPadding = {
@@ -80,8 +86,9 @@ export type RatingChartOptions = {
   width?: number;
   height?: number;
   highestRankBoundary?: number;
-  minimumStart?: string;
+  joinedAt?: string;
   startAt?: string;
+  endAt?: string;
 };
 export const ratingHistoryChart = (
   history: readonly RatingRecord[],
@@ -89,8 +96,9 @@ export const ratingHistoryChart = (
     width = 600,
     height = 180,
     highestRankBoundary = 0,
-    minimumStart,
-    startAt = minimumStart,
+    joinedAt,
+    startAt = joinedAt,
+    endAt,
   }: RatingChartOptions = {},
 ): RatingChart | null => {
   if (history.length === 0) return null;
@@ -100,18 +108,24 @@ export const ratingHistoryChart = (
   const requestedStart = startAt
     ? Date.parse(startAt)
     : Math.min(...timestamps);
-  const launchTime = minimumStart
-    ? Date.parse(minimumStart)
-    : Math.min(...timestamps);
+  const joinedTime = joinedAt ? Date.parse(joinedAt) : Math.min(...timestamps);
   const firstTime = Math.min(
     lastTime,
     Math.max(
-      launchTime,
-      Number.isFinite(requestedStart) ? requestedStart : launchTime,
+      joinedTime,
+      Number.isFinite(requestedStart) ? requestedStart : joinedTime,
     ),
   );
+  const requestedEnd = endAt ? Date.parse(endAt) : lastTime;
+  const visibleEndTime = Math.max(
+    firstTime,
+    Math.min(lastTime, Number.isFinite(requestedEnd) ? requestedEnd : lastTime),
+  );
   const visibleRecords = history.flatMap((record, recordIndex) =>
-    timestamps[recordIndex] >= firstTime ? [{ record, recordIndex }] : [],
+    timestamps[recordIndex] >= firstTime &&
+    timestamps[recordIndex] <= visibleEndTime
+      ? [{ record, recordIndex }]
+      : [],
   );
   const ratingAtStart = history.reduce(
     (rating, record, index) =>
@@ -132,28 +146,30 @@ export const ratingHistoryChart = (
   const plotWidth = width - chartPadding.left - chartPadding.right;
   const plotHeight = height - chartPadding.top - chartPadding.bottom;
   const xForTime = (at: number) =>
-    firstTime === lastTime
+    firstTime === visibleEndTime
       ? chartPadding.left + plotWidth / 2
       : chartPadding.left +
-        ((at - firstTime) / (lastTime - firstTime)) * plotWidth;
+        ((at - firstTime) / (visibleEndTime - firstTime)) * plotWidth;
   const yForRating = (rating: number) =>
     chartPadding.top + ((maximum - rating) / maximum) * plotHeight;
-  const points = visibleRecords.map(({ record, recordIndex }) => ({
-    x: xForTime(timestamps[recordIndex]),
-    y: yForRating(record.rating),
-    rating: record.rating,
-    recordIndex,
-  }));
+  let previousRating = ratingAtStart;
+  const points = visibleRecords.map(({ record, recordIndex }) => {
+    const point = {
+      x: xForTime(timestamps[recordIndex]),
+      y: yForRating(record.rating),
+      at: timestamps[recordIndex],
+      rating: record.rating,
+      previousRating,
+      delta: record.rating - previousRating,
+      recordIndex,
+    };
+    previousRating = record.rating;
+    return point;
+  });
   const tracePoints = [
     { x: xForTime(firstTime), y: yForRating(ratingAtStart) },
+    ...points.map(({ x, y }) => ({ x, y })),
   ];
-  points.forEach((point, index) => {
-    tracePoints.push({
-      x: point.x,
-      y: index === 0 ? yForRating(ratingAtStart) : points[index - 1].y,
-    });
-    tracePoints.push({ x: point.x, y: point.y });
-  });
 
   return {
     width,
@@ -164,10 +180,13 @@ export const ratingHistoryChart = (
       const value = maximum - index * tickStep;
       return { value, y: yForRating(value) };
     }),
-    timeTicks: chartTimeTicks(firstTime, lastTime, plotWidth, xForTime),
+    timeTicks: chartTimeTicks(firstTime, visibleEndTime, plotWidth, xForTime),
     minimum,
     maximum,
     firstDate: new Date(firstTime).toISOString(),
-    lastDate: new Date(lastTime).toISOString(),
+    lastDate: new Date(visibleEndTime).toISOString(),
+    sourceHistory: history,
+    joinedAt: new Date(joinedTime).toISOString(),
+    highestRankBoundary,
   };
 };

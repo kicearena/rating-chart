@@ -15,12 +15,12 @@ const records = [
   rating: Number(rating),
 }));
 function App() {
-  const [startAt, setStart] = useState("2025-01-01");
+  const [startAt, setStart] = useState("2024-12-01");
   const chart = ratingHistoryChart(records, {
     width: 850,
     height: 340,
     startAt: `${startAt}T00:00:00+09:00`,
-    minimumStart: "2025-01-01T00:00:00+09:00",
+    joinedAt: "2024-12-01T00:00:00+09:00",
     highestRankBoundary: 2200,
   })!;
   return (
@@ -28,7 +28,9 @@ function App() {
       <small>KICE ARENA / OPEN SOURCE · MIT</small>
       <h1>A history, drawn in time.</h1>
       <p>
-        Calendar-spaced step charts for prepared rating records. Bring your own
+        Calendar-spaced line charts for prepared rating records. Drag across the
+        plot to zoom into a date range, then use horizontal scroll or
+        Shift+scroll to move through it; double-click to reset. Bring your own
         rating rules, bands and labels.
       </p>
       <section>
@@ -38,7 +40,7 @@ function App() {
             Start date{" "}
             <input
               type="date"
-              min="2025-01-01"
+              min="2024-12-01"
               max="2025-10-05"
               value={startAt}
               onChange={(e) => setStart(e.target.value || "2025-01-01")}
