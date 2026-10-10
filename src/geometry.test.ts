@@ -64,6 +64,20 @@ describe("rating chart geometry", () => {
     expect(chart?.ticks.at(-1)?.value).toBe(0);
   });
 
+  it("extends the final rating across the selected range after its last record", () => {
+    const chart = ratingHistoryChart([record(1_000, "2026-01-01T00:00:00Z")], {
+      width: 600,
+      height: 180,
+      joinedAt: "2025-12-01T00:00:00Z",
+      endAt: "2026-02-01T00:00:00Z",
+    })!;
+
+    expect(chart.tracePoints.at(-1)).toMatchObject({
+      x: 584,
+      y: chart.points[0]?.y,
+    });
+  });
+
   it("carries the previous rating into a selected start date and hides earlier contests", () => {
     const chart = legacyChart(
       [

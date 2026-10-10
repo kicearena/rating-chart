@@ -119,7 +119,7 @@ export const ratingHistoryChart = (
   const requestedEnd = endAt ? Date.parse(endAt) : lastTime;
   const visibleEndTime = Math.max(
     firstTime,
-    Math.min(lastTime, Number.isFinite(requestedEnd) ? requestedEnd : lastTime),
+    Number.isFinite(requestedEnd) ? requestedEnd : lastTime,
   );
   const visibleRecords = history.flatMap((record, recordIndex) =>
     timestamps[recordIndex] >= firstTime &&
@@ -170,6 +170,13 @@ export const ratingHistoryChart = (
     { x: xForTime(firstTime), y: yForRating(ratingAtStart) },
     ...points.map(({ x, y }) => ({ x, y })),
   ];
+  const lastPoint = points.at(-1);
+  if (!lastPoint || lastPoint.at < visibleEndTime) {
+    tracePoints.push({
+      x: xForTime(visibleEndTime),
+      y: yForRating(lastPoint?.rating ?? ratingAtStart),
+    });
+  }
 
   return {
     width,
