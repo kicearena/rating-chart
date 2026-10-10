@@ -1,6 +1,6 @@
 {
   "name": "@kicearena/rating-chart",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Calendar-spaced line charts and SVG rendering for prepared rating histories.",
   "repository": {
