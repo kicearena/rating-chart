@@ -1,0 +1,52 @@
+{
+  "name": "@kicearena/rating-chart",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Calendar-spaced step charts and SVG rendering for prepared rating histories.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kicearena/rating-chart.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./geometry": {
+      "types": "./dist/geometry.d.ts",
+      "import": "./dist/geometry.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc --noEmit -p tsconfig.json && prettier --check .",
+    "demo": "vite --config vite.demo.config.ts --host 127.0.0.1",
+    "demo:build": "vite build --config vite.demo.config.ts"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "4.1.11",
+    "@types/node": "25.9.1",
+    "prettier": "3.8.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "@types/react": "19.2.16",
+    "@types/react-dom": "19.2.3",
+    "vite": "7.3.5"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.2.3"
+  }
+}
